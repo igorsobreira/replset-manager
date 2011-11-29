@@ -1,15 +1,20 @@
 #!/usr/bin/env python
 
+
 import argparse
 
-def do_create(args):
-    print 'create ', args
+import commands
+
+def do_create(args):    
+    create = commands.Create(args)
+    create.handle()
 
 def do_list_nodes(args):
     print 'list nodes', args
 
 def do_kill_nodes(args):
     print 'kill nodes', args
+
 
 def main():
     parser = argparse.ArgumentParser(description='MongoDB ReplicaSet Manager')
@@ -26,17 +31,12 @@ def main():
 
     parser_create.set_defaults(func=do_create)
     parser_listnodes.set_defaults(func=do_list_nodes)
-    parser_killnodes.set_defaults(func=do_kill_nodes)
+    parser_killnodes.set_defaults(func=do_kill_nodes)    
     
     # 'create' command options
     
-    parser_create.add_argument('--name', action='store', nargs='?', required=True,
-                               help='The replica set name')
-    parser_create.add_argument('--members', action='store', nargs='?', default=3,
-                               help='How many members this replica set should have. 3 by default')
-    parser_create.add_argument('--dbpath', action='store', nargs='?', default='/data',
-                               help='Directory for datafiles. "/data" by default')
-    
+    commands.Create.configure_parser(parser_create)
+
     # 'listnodes' command options
     
     parser_listnodes.add_argument('--verbose', action='store_true',
