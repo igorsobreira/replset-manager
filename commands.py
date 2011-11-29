@@ -12,6 +12,7 @@ class Command(object):
     def handle(self):
         raise NotImplementedError
 
+
 class Create(Command):
 
     desc = 'Create new replica set'
@@ -28,20 +29,26 @@ class Create(Command):
                             help='Directory for datafiles. "/data" by default')
         parser.add_argument('--mongod', action='store', nargs='?', default='mongod',
                             help='`mongod` executable')
+        parser.add_argument('--logsdir', action='store', nargs='?', default='/tmp/logs',
+                            help='Directory to store nodes logs')
 
     def handle(self):
-        command = '{mongod} --dbpath={dbpath} --rest --replSet {name} --port={port} &'
+        command = ('{mongod} --dbpath={dbpath} --rest --replSet '
+                   '{name} --port={port} --logpath {log} &')
 
         for node in range(self.args.members):
             dbpath = os.path.join(self.args.dbpath, str(node+1))
+            logfile = os.path.join(self.args.logsdir, '{0}.log'.format(node+1))
+
             self.ensure_directory_exists(dbpath)
+            self.ensure_directory_exists(self.args.logsdir)
             
             cmd = command.format(mongod=self.args.mongod,
                                  port=self.first_port+node,
                                  dbpath=dbpath,
-                                 name=self.args.name)
+                                 name=self.args.name,
+                                 log=logfile)
             print(cmd)
-        
         
     def ensure_directory_exists(self, directory):
         try:
