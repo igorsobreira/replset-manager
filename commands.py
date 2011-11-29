@@ -14,6 +14,7 @@ class Command(object):
 
 class Create(Command):
 
+    desc = 'Create new replica set'
     first_port = 27001
 
     @classmethod

@@ -22,8 +22,7 @@ def main():
 
     # available commands
 
-    parser_create = subparsers.add_parser('create',
-                                          help='Create new replica set')
+    parser_create = subparsers.add_parser('create', help=commands.Create.desc)
     parser_listnodes = subparsers.add_parser('listnodes',
                                              help='List all available nodes')
     parser_killnodes = subparsers.add_parser('killnodes',
@@ -32,8 +31,6 @@ def main():
     parser_create.set_defaults(func=do_create)
     parser_listnodes.set_defaults(func=do_list_nodes)
     parser_killnodes.set_defaults(func=do_kill_nodes)    
-    
-    # 'create' command options
     
     commands.Create.configure_parser(parser_create)
 
