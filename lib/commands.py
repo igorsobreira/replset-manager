@@ -2,6 +2,8 @@ import os
 import errno
 from subprocess import Popen
 
+from lib import state
+
 class Command(object):
     def __init__(self, args):
         self.args = args
@@ -54,7 +56,7 @@ class Create(Command):
             p = Popen(cmd, shell=True)
             pids.append(p.pid)
 
-        print pids
+        state.dump(pids)
         
     def ensure_directory_exists(self, directory):
         try:

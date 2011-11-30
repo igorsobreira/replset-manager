@@ -6,9 +6,10 @@ import pytest
 from lib import state
 from lib.state import State
 
-def setup_func(func):
-    if os.path.isfile(state.filename):
-        os.remove(state.filename)
+from helpers import remove_state_file
+
+def setup_function(func):
+    remove_state_file()
 
 def test_state_should_behave_like_dict():
     state = State()
