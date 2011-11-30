@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-
 import argparse
 
-import commands
+from lib import commands
+
 
 def do_create(args):    
     create = commands.Create(args)
