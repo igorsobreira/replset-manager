@@ -1,5 +1,6 @@
 import os
 import errno
+from subprocess import Popen
 
 class Command(object):
     def __init__(self, args):
@@ -25,8 +26,8 @@ class Create(Command):
         parser.add_argument('--members', action='store', nargs='?', default=3,
                             help='How many members this replica set should have. '
                             '3 by default')
-        parser.add_argument('--dbpath', action='store', nargs='?', default='/data',
-                            help='Directory for datafiles. "/data" by default')
+        parser.add_argument('--dbpath', action='store', nargs='?', default='/tmp/data',
+                            help='Directory for datafiles. "/tmp/data" by default')
         parser.add_argument('--mongod', action='store', nargs='?', default='mongod',
                             help='`mongod` executable')
         parser.add_argument('--logsdir', action='store', nargs='?', default='/tmp/logs',
@@ -35,6 +36,8 @@ class Create(Command):
     def handle(self):
         command = ('{mongod} --dbpath={dbpath} --rest --replSet '
                    '{name} --port={port} --logpath {log} &')
+
+        pids = []
 
         for node in range(self.args.members):
             dbpath = os.path.join(self.args.dbpath, str(node+1))
@@ -45,10 +48,13 @@ class Create(Command):
             
             cmd = command.format(mongod=self.args.mongod,
                                  port=self.first_port+node,
-                                 dbpath=dbpath,
                                  name=self.args.name,
+                                 dbpath=dbpath,
                                  log=logfile)
-            print(cmd)
+            p = Popen(cmd, shell=True)
+            pids.append(p.pid)
+
+        print pids
         
     def ensure_directory_exists(self, directory):
         try:
