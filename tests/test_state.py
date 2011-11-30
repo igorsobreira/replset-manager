@@ -38,4 +38,5 @@ def test_stateloader_should_load_existing_state(tmpdir):
 
     s = state.load()
     
+    assert isinstance(s, State)
     assert [1,2] == s.pids
