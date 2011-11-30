@@ -1,6 +1,6 @@
 import os
 import errno
-from subprocess import Popen
+from subprocess import Popen, PIPE
 
 from lib import state
 
@@ -53,7 +53,7 @@ class Create(Command):
                                  name=self.args.name,
                                  dbpath=dbpath,
                                  log=logfile)
-            p = Popen(cmd, shell=True)
+            p = Popen(cmd, shell=True, stdout=PIPE)
             pids.append(p.pid)
 
         state.dump(pids)
