@@ -39,7 +39,7 @@ class Create(Command):
         command = ('{mongod} --dbpath={dbpath} --rest --replSet '
                    '{name} --port={port} --logpath {log} &')
 
-        pids = []
+        nodes = {}
 
         for node in range(self.args.members):
             dbpath = os.path.join(self.args.dbpath, str(node+1))
@@ -54,9 +54,9 @@ class Create(Command):
                                  dbpath=dbpath,
                                  log=logfile)
             p = Popen(cmd, shell=True, stdout=PIPE)
-            pids.append(p.pid)
+            nodes[node+1] = {'pid': p.pid}
 
-        state.dump(pids)
+        state.dump(nodes)
         
     def ensure_directory_exists(self, directory):
         try:

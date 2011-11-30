@@ -3,6 +3,7 @@
 import argparse
 
 from lib import commands
+from lib import state
 
 
 def do_create(args):    
@@ -10,7 +11,10 @@ def do_create(args):
     create.handle()
 
 def do_list_nodes(args):
-    print 'list nodes', args
+    nodes = state.load()
+    for node in nodes:
+        print ' => Node {0}'.format(node)
+        print '  \_ pid: {0}'.format(nodes[node]['pid'])
 
 def do_kill_nodes(args):
     print 'kill nodes', args

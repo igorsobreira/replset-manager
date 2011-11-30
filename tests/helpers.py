@@ -12,9 +12,11 @@ def remove_state_file():
 
 def run(command):
     manager = abspath(join(dirname(__file__), '..', 'manager.py'))
-    cmd = 'python {0} {1} --name testrepl'.format(manager, command)
+    if command == 'create':
+        command += ' --name testrepl'
+    cmd = 'python {0} {1}'.format(manager, command)
 
-    subprocess.call(cmd, shell=True, stdout=None)
+    return subprocess.check_output(cmd, shell=True)
 
 def assert_mongods_running(count):
     try:
