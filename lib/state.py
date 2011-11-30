@@ -15,5 +15,5 @@ class State(dict):
     def __setattr__(self, attr, value):
         self[attr] = value
 
-    def __getattribute__(self, attr):
+    def __getattr__(self, attr):
         return self[attr]
