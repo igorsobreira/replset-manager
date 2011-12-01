@@ -4,6 +4,8 @@ from subprocess import Popen, PIPE
 
 from lib import state
 
+__all__ = 'Create', 'ListNodes'
+
 class Command(object):
     def __init__(self, args):
         self.args = args
@@ -64,3 +66,28 @@ class Create(Command):
         except OSError, ex:
             if ex.errno != errno.EEXIST:
                 raise ex
+
+
+
+class ListNodes(Command):
+
+    desc = 'List all available nodes'
+    
+    @classmethod
+    def configure_parser(cls):
+        parser.add_argument('--verbose', action='store_true',
+                            help='Show more information')
+    
+
+    def handle(self):
+        try:
+            nodes = state.load()
+        except IOError as ex:
+            if ex.errno == errno.ENOENT: # No such file or directory
+                print 'No mongod running'
+            return
+
+        for node in nodes:
+            print ' => Node {0}'.format(node)
+            print '  \_ pid: {0}'.format(nodes[node]['pid'])
+

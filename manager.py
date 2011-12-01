@@ -12,17 +12,9 @@ def do_create(args):
     create = commands.Create(args)
     create.handle()
 
-def do_list_nodes(args):
-    try:
-        nodes = state.load()
-    except IOError as ex:
-        if ex.errno == errno.ENOENT: # No such file or directory
-            print 'No mongod running'
-            return
-
-    for node in nodes:
-        print ' => Node {0}'.format(node)
-        print '  \_ pid: {0}'.format(nodes[node]['pid'])
+def do_list_nodes(args): 
+    list_nodes = commands.ListNodes(args)
+    list_nodes.handle()
 
 def do_kill_nodes(args):
     nodes = state.load()
@@ -46,8 +38,7 @@ def main():
     # available commands
 
     parser_create = subparsers.add_parser('create', help=commands.Create.desc)
-    parser_listnodes = subparsers.add_parser('listnodes',
-                                             help='List all available nodes')
+    parser_listnodes = subparsers.add_parser('listnodes', help=commands.ListNodes.desc)
     parser_killnodes = subparsers.add_parser('killnodes',
                                              help='Kill replica set nodes')
 
@@ -56,13 +47,6 @@ def main():
     parser_killnodes.set_defaults(func=do_kill_nodes)    
     
     commands.Create.configure_parser(parser_create)
-
-    # 'listnodes' command options
-    
-    parser_listnodes.add_argument('--verbose', action='store_true',
-                                  help='Show more information')
-    
-    # 'killnode' command options
     
     parser_killnodes.add_argument('nodes', action='store', nargs='+',
                                   help='Kill these nodes', default='all')
