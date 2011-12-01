@@ -18,12 +18,19 @@ def do_list_nodes(args):
         print '  \_ pid: {0}'.format(nodes[node]['pid'])
 
 def do_kill_nodes(args):
-    for node, info in state.load().iteritems():
-        print 'Killing node {0} with pid {1}'.format(node, info['pid'])
-        os.kill(info['pid'], 15)
+    nodes = state.load()
 
     if 'all' in args.nodes:
+        for node, info in nodes.iteritems():
+            print 'Killing node {0} with pid {1}'.format(node, info['pid'])
+            os.kill(info['pid'], 15)
         state.clear()
+    else:
+        for node in args.nodes:
+            info = nodes.pop(node)
+            print 'Killing node {0} with pid {1}'.format(node, info['pid'])
+            os.kill(info['pid'], 15)
+        state.dump(nodes)
 
 def main():
     parser = argparse.ArgumentParser(description='MongoDB ReplicaSet Manager')

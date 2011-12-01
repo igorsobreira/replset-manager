@@ -7,8 +7,7 @@ from lib import state
 
 
 def remove_state_file():
-    if os.path.isfile(state.filename):
-        os.remove(state.filename)
+    state.clear()
 
 def kill_running_mongods():
     subprocess.call("ps ax | grep mongod | grep -v grep | awk '{print $1}' | xargs kill",
@@ -29,21 +28,20 @@ def run(command):
 
     ret = subprocess.check_output(cmd, shell=True)
 
-    if command == 'killnodes':
-        time.sleep(1)
+    if 'killnodes' in command:
+        time.sleep(0.2)
 
     return ret
 
 def assert_mongods_running(count):
-    try:
-        procs = subprocess.check_output('ps ax | grep mongod | grep -v grep',
-                                        shell=True)
-    except subprocess.CalledProcessError as ex:
-        if count == 0:
-            return
-        raise ex
+    popen = subprocess.Popen('ps ax | grep mongod | grep -v grep',
+                             shell=True,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+    output, err = popen.communicate()
+    proc_list = output.strip().split('\n')
+    actual_count = len(filter(bool, proc_list))
 
-    actual_count = len(procs.strip().split('\n'))
     assert count == actual_count, \
         "Should have %s mongos running, but %s found" % (count, actual_count)
 
