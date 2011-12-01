@@ -41,3 +41,10 @@ def test_stateloader_should_load_existing_state(tmpdir):
     
     assert isinstance(s, State)
     assert [1,2] == s.pids
+
+def test_clear_should_remove_state_file():
+    state.dump({'foo': 'bar'})
+
+    assert os.path.isfile(state.filename)
+    state.clear()
+    assert not os.path.isfile(state.filename)

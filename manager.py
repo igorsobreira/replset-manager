@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import argparse
 
 from lib import commands
@@ -17,8 +18,12 @@ def do_list_nodes(args):
         print '  \_ pid: {0}'.format(nodes[node]['pid'])
 
 def do_kill_nodes(args):
-    print 'kill nodes', args
+    for node, info in state.load().iteritems():
+        print 'Killing node {0} with pid {1}'.format(node, info['pid'])
+        os.kill(info['pid'], 15)
 
+    if 'all' in args.nodes:
+        state.clear()
 
 def main():
     parser = argparse.ArgumentParser(description='MongoDB ReplicaSet Manager')
@@ -45,8 +50,8 @@ def main():
     
     # 'killnode' command options
     
-    parser_killnodes.add_argument('nodes', action='store', nargs='+', type=int,
-                                  help='Kill these nodes')
+    parser_killnodes.add_argument('nodes', action='store', nargs='+',
+                                  help='Kill these nodes', default='all')
     
     args = parser.parse_args()
     args.func(args)

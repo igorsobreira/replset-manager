@@ -37,7 +37,7 @@ class Create(Command):
 
     def handle(self):
         command = ('{mongod} --dbpath={dbpath} --rest --replSet '
-                   '{name} --port={port} --logpath {log} &')
+                   '{name} --port={port} --logpath {log}')
 
         nodes = {}
 

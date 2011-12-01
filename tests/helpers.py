@@ -10,13 +10,29 @@ def remove_state_file():
     if os.path.isfile(state.filename):
         os.remove(state.filename)
 
+def kill_running_mongods():
+    subprocess.call("ps ax | grep mongod | grep -v grep | awk '{print $1}' | xargs kill",
+                    shell=True)
+    time.sleep(0.2)
+
+def clear_environ():
+    remove_state_file()
+    kill_running_mongods()
+
 def run(command):
     manager = abspath(join(dirname(__file__), '..', 'manager.py'))
+
     if command == 'create':
         command += ' --name testrepl'
+
     cmd = 'python {0} {1}'.format(manager, command)
 
-    return subprocess.check_output(cmd, shell=True)
+    ret = subprocess.check_output(cmd, shell=True)
+
+    if command == 'killnodes':
+        time.sleep(1)
+
+    return ret
 
 def assert_mongods_running(count):
     try:
@@ -28,9 +44,8 @@ def assert_mongods_running(count):
         raise ex
 
     actual_count = len(procs.strip().split('\n'))
-    assert count == actual_count, "Should have %s mongos running, but %s found" % (count, actual_count)
+    assert count == actual_count, \
+        "Should have %s mongos running, but %s found" % (count, actual_count)
 
-def kill_running_mongods():
-    subprocess.call("ps ax | grep mongod | grep -v grep | awk '{print $1}' | xargs kill",
-                    shell=True)
-    time.sleep(0.2)
+def assert_no_state_file():
+    assert not os.path.isfile(state.filename)
