@@ -1,0 +1,2 @@
+#!/bin/bash
+ps axu | grep mongod | grep -v grep
