@@ -25,6 +25,14 @@ class Command(object):
     def call(cls, args):
         cls(args).handle()
 
+    def load_state(self):
+        try:
+            return state.load()
+        except IOError as ex:
+            if ex.errno == errno.ENOENT: # No such file or directory
+                print 'No mongod running'
+                exit(0)
+
 class Create(Command):
 
     name = 'create'
@@ -89,12 +97,7 @@ class ListNodes(Command):
     
 
     def handle(self):
-        try:
-            nodes = state.load()
-        except IOError as ex:
-            if ex.errno == errno.ENOENT: # No such file or directory
-                print 'No mongod running'
-            return
+        nodes = self.load_state()
 
         for node in nodes:
             print ' => Node {0}'.format(node)
@@ -113,7 +116,7 @@ class KillNodes(Command):
                             default='all')
     
     def handle(self):
-        nodes = state.load()
+        nodes = self.load_state()
 
         if 'all' in self.args.nodes:
             for node, info in nodes.iteritems():

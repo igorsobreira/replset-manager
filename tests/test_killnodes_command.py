@@ -22,3 +22,9 @@ def test_kill_should_kill_just_specific_nodes():
 
     nodes = state.load()
     assert ['1'] == nodes.keys()
+
+def test_should_not_fail_if_no_state_file():
+    assert_mongods_running(0)
+    assert_no_state_file()
+
+    run('killnodes all')
