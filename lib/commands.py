@@ -7,6 +7,10 @@ from lib import state
 __all__ = 'Create', 'ListNodes'
 
 class Command(object):
+    '''
+    Abstract class to all command
+    '''
+
     def __init__(self, args):
         self.args = args
 
@@ -74,7 +78,7 @@ class ListNodes(Command):
     desc = 'List all available nodes'
     
     @classmethod
-    def configure_parser(cls):
+    def configure_parser(cls, parser):
         parser.add_argument('--verbose', action='store_true',
                             help='Show more information')
     
@@ -91,3 +95,28 @@ class ListNodes(Command):
             print ' => Node {0}'.format(node)
             print '  \_ pid: {0}'.format(nodes[node]['pid'])
 
+
+class KillNodes(Command):
+    
+    desc = 'Kill replica set nodes'
+
+    @classmethod
+    def configure_parser(cls, parser):
+        parser.add_argument('nodes', action='store', nargs='+',
+                            help="Kill specific nodes by id or 'all'", 
+                            default='all')
+    
+    def handle(self):
+        nodes = state.load()
+
+        if 'all' in self.args.nodes:
+            for node, info in nodes.iteritems():
+                print 'Killing node {0} with pid {1}'.format(node, info['pid'])
+                os.kill(info['pid'], 15)
+            state.clear()
+        else:
+            for node in self.args.nodes:
+                info = nodes.pop(node)
+                print 'Killing node {0} with pid {1}'.format(node, info['pid'])
+                os.kill(info['pid'], 15)
+            state.dump(nodes)
