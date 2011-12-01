@@ -7,37 +7,17 @@ import errno
 from lib import commands
 from lib import state
 
-
-def do_create(args):    
-    create = commands.Create(args)
-    create.handle()
-
-def do_list_nodes(args): 
-    list_nodes = commands.ListNodes(args)
-    list_nodes.handle()
-
-def do_kill_nodes(args):
-    kill_nodes = commands.KillNodes(args)
-    kill_nodes.handle()
-
 def main():
     parser = argparse.ArgumentParser(description='MongoDB ReplicaSet Manager')
     subparsers = parser.add_subparsers()
 
-    # available commands
+    for command_class_name in commands.__all__:
+        command_class = getattr(commands, command_class_name)
+        command_parser = subparsers.add_parser(command_class.name,
+                                               help=command_class.desc)
+        command_parser.set_defaults(func=command_class.call)
+        command_class.configure_parser(command_parser)
 
-    parser_create = subparsers.add_parser('create', help=commands.Create.desc)
-    parser_listnodes = subparsers.add_parser('listnodes', help=commands.ListNodes.desc)
-    parser_killnodes = subparsers.add_parser('killnodes', help=commands.KillNodes.desc)
-
-    parser_create.set_defaults(func=do_create)
-    parser_listnodes.set_defaults(func=do_list_nodes)
-    parser_killnodes.set_defaults(func=do_kill_nodes)    
-    
-    commands.Create.configure_parser(parser_create)
-    commands.ListNodes.configure_parser(parser_listnodes)
-    commands.KillNodes.configure_parser(parser_killnodes)
-    
     args = parser.parse_args()
     args.func(args)
 

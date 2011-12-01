@@ -4,7 +4,7 @@ from subprocess import Popen, PIPE
 
 from lib import state
 
-__all__ = 'Create', 'ListNodes'
+__all__ = 'Create', 'ListNodes', 'KillNodes'
 
 class Command(object):
     '''
@@ -21,9 +21,13 @@ class Command(object):
     def handle(self):
         raise NotImplementedError
 
+    @classmethod
+    def call(cls, args):
+        cls(args).handle()
 
 class Create(Command):
 
+    name = 'create'
     desc = 'Create new replica set'
     first_port = 27001
 
@@ -75,6 +79,7 @@ class Create(Command):
 
 class ListNodes(Command):
 
+    name = 'listnodes'
     desc = 'List all available nodes'
     
     @classmethod
@@ -97,7 +102,8 @@ class ListNodes(Command):
 
 
 class KillNodes(Command):
-    
+
+    name = 'killnodes'
     desc = 'Kill replica set nodes'
 
     @classmethod
