@@ -2,6 +2,7 @@
 
 import os
 import argparse
+import errno
 
 from lib import commands
 from lib import state
@@ -12,7 +13,13 @@ def do_create(args):
     create.handle()
 
 def do_list_nodes(args):
-    nodes = state.load()
+    try:
+        nodes = state.load()
+    except IOError as ex:
+        if ex.errno == errno.ENOENT: # No such file or directory
+            print 'No mongod running'
+            return
+
     for node in nodes:
         print ' => Node {0}'.format(node)
         print '  \_ pid: {0}'.format(nodes[node]['pid'])
