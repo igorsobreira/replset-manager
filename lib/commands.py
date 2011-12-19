@@ -1,6 +1,10 @@
 import os
 import errno
-from subprocess import Popen, PIPE
+import pprint
+import time
+import subprocess
+
+import pymongo
 
 from lib import state
 
@@ -32,6 +36,15 @@ class Command(object):
             if ex.errno == errno.ENOENT: # No such file or directory
                 print 'No mongod running'
                 exit(0)
+
+    def info(self, msg, format=False):
+        if format:
+            pprint.pprint(msg)
+        else:
+            print(msg)
+    
+    def error(self, msg):
+        print(msg)
 
 class Create(Command):
 
@@ -65,16 +78,21 @@ class Create(Command):
 
             self.ensure_directory_exists(dbpath)
             self.ensure_directory_exists(self.args.logsdir)
-            
+            port = self.first_port+node
+
             cmd = command.format(mongod=self.args.mongod,
-                                 port=self.first_port+node,
+                                 port=port,
                                  name=self.args.name,
                                  dbpath=dbpath,
                                  log=logfile)
-            p = Popen(cmd, shell=True, stdout=PIPE)
-            nodes[node+1] = {'pid': p.pid}
+            self.info("Starting node {0}".format(node+1))
+            p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+            nodes[node+1] = {'pid': p.pid, 'port': port, 'host': 'igormac'}
+
+        self.initiate(nodes)
 
         state.dump(nodes)
+        self.info("Use listnodes for more information about each node")
         
     def ensure_directory_exists(self, directory):
         try:
@@ -83,7 +101,29 @@ class Create(Command):
             if ex.errno != errno.EEXIST:
                 raise ex
 
+    def initiate(self, nodes):
+        self.info('Initiating replica set')
+        primary = nodes[1]
+        admin = None
+        limit = 5
+        while not admin:
+            if limit == 0:
+                self.error('Primary not found. Give up!')
+                self.error('Fail.')
+                return
+            limit -= 1
 
+            try:
+                admin = pymongo.Connection(primary['host'],
+                                           primary['port'],
+                                           slave_okay=True).admin
+            except pymongo.errors.AutoReconnect:
+                time.sleep(0.1)
+                self.info('Primary not found yet... retrying')
+
+        result = admin.command('replSetInitiate')
+        self.info(result, format=True)
+        self.info('ok')
 
 class ListNodes(Command):
 
