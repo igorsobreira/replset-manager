@@ -3,10 +3,12 @@ import errno
 import pprint
 import time
 import subprocess
+import sys
 
 import pymongo
 
-from lib import state
+from lib import state, exitcodes
+from lib.colors import red
 
 __all__ = 'Create', 'ListNodes', 'KillNodes'
 
@@ -44,7 +46,7 @@ class Command(object):
             print(msg)
     
     def error(self, msg):
-        print(msg)
+        sys.stderr.write(red(msg + "\n"))
 
 class Create(Command):
 
@@ -67,6 +69,8 @@ class Create(Command):
                             help='Directory to store nodes logs')
 
     def handle(self):
+        self.exit_if_existing_state_file()
+
         command = ('{mongod} --dbpath={dbpath} --rest --replSet '
                    '{name} --port={port} --logpath {log}')
         nodes = {}
@@ -91,6 +95,12 @@ class Create(Command):
         self.initiate(nodes)
         state.dump(nodes)
         self.info("Use `listnodes` command for more information about each node")
+
+    def exit_if_existing_state_file(self):
+        if state.exists():
+            self.error("Mongods already started")
+            self.error("(state file found on '{0}')".format(state.filename))
+            exit(exitcodes.MONGOD_ALREADY_STARTED)
         
     def ensure_directory_exists(self, directory):
         try:

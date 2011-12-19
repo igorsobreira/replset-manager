@@ -46,7 +46,12 @@ def run(command):
     write_test_log(out)
     write_test_log(err)
 
-    return out, err
+    output = type('Output', (object,), 
+                  {'stdout': out,
+                   'stderr': err,
+                   'exitcode': popen.returncode})
+
+    return output()
 
 def assert_mongods_running(count):
     popen = subprocess.Popen('ps ax | grep mongod | grep -v grep',

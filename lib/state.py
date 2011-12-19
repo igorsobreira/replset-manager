@@ -11,8 +11,11 @@ def load():
     with open(filename, 'r') as fileobj:
         return State(json.loads(fileobj.read()))
 
+def exists():
+    return os.path.isfile(filename)
+
 def clear():
-    if os.path.isfile(filename):
+    if exists():
         os.remove(filename)
 
 class State(dict):
