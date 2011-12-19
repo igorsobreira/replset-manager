@@ -8,7 +8,7 @@ def setup_function(func):
 
 def test_should_list_all_running_nodes():
     run('create')
-    nodes_info = run('listnodes')
+    nodes_info, err = run('listnodes')
 
     assert_mongods_running(3)
     assert 3 == nodes_info.count('Node')
