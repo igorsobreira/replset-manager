@@ -69,7 +69,6 @@ class Create(Command):
     def handle(self):
         command = ('{mongod} --dbpath={dbpath} --rest --replSet '
                    '{name} --port={port} --logpath {log}')
-
         nodes = {}
 
         for node in range(self.args.members):
@@ -85,14 +84,13 @@ class Create(Command):
                                  name=self.args.name,
                                  dbpath=dbpath,
                                  log=logfile)
-            self.info("Starting node {0}".format(node+1))
+            self.info("Starting node {0} ({1})".format(node+1, cmd))
             p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
             nodes[node+1] = {'pid': p.pid, 'port': port, 'host': 'igormac'}
 
         self.initiate(nodes)
-
         state.dump(nodes)
-        self.info("Use listnodes for more information about each node")
+        self.info("Use `listnodes` command for more information about each node")
         
     def ensure_directory_exists(self, directory):
         try:
@@ -118,7 +116,7 @@ class Create(Command):
                                            primary['port'],
                                            slave_okay=True).admin
             except pymongo.errors.AutoReconnect:
-                time.sleep(0.1)
+                time.sleep(0.5)
                 self.info('Primary not found yet... retrying')
 
         result = admin.command('replSetInitiate')
