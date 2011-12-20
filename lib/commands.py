@@ -14,7 +14,7 @@ __all__ = 'Create', 'ListNodes', 'KillNodes'
 
 class Command(object):
     '''
-    Abstract class to all command
+    Abstract class to all commands
     '''
 
     def __init__(self, args):
@@ -70,30 +70,9 @@ class Create(Command):
 
     def handle(self):
         self.exit_if_existing_state_file()
-
-        command = ('{mongod} --dbpath={dbpath} --rest --replSet '
-                   '{name} --port={port} --logpath {log}')
-        nodes = {}
-
-        for node in range(self.args.members):
-            dbpath = os.path.join(self.args.dbpath, str(node+1))
-            logfile = os.path.join(self.args.logsdir, '{0}.log'.format(node+1))
-
-            self.ensure_directory_exists(dbpath)
-            self.ensure_directory_exists(self.args.logsdir)
-            port = self.first_port+node
-
-            cmd = command.format(mongod=self.args.mongod,
-                                 port=port,
-                                 name=self.args.name,
-                                 dbpath=dbpath,
-                                 log=logfile)
-            self.info("Starting node {0} ({1})".format(node+1, cmd))
-            p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-            nodes[node+1] = {'pid': p.pid, 'port': port, 'host': 'igormac'}
-
+        nodes = self.start_all_mongo_nodes()
         self.initiate(nodes)
-        state.dump(nodes)
+        self.save_state(nodes)
         self.info("Use `listnodes` command for more information about each node")
 
     def exit_if_existing_state_file(self):
@@ -101,17 +80,58 @@ class Create(Command):
             self.error("Mongods already started")
             self.error("(state file found on '{0}')".format(state.filename))
             exit(exitcodes.MONGOD_ALREADY_STARTED)
+
+    def start_all_mongo_nodes(self):
+        nodes = {}
+        for node in range(self.args.members):
+            node_label = str(node + 1)
+            node_info = self.start_mongo_node(node_index=node,
+                                              node_label=node_label)
+            nodes[node_label] = node_info
+
+        return nodes
+
+    def start_mongo_node(self, node_index, node_label):
+        port = self.get_node_port(node_index)
+        command = self.build_mongod_command(node_label, port)
+
+        self.info("Starting node {0} ({1})".format(node_label, command))
+        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+
+        return {'pid': p.pid,
+                'port': port,
+                'host': 'igormac'}
+
+    def get_node_port(self, node_index):
+        return self.first_port + node_index
+    
+    def build_mongod_command(self, node_label, port):
+        command = ('{mongod} --dbpath={dbpath} --rest --replSet '
+                   '{name} --port={port} --logpath {log}')
+
+        dbpath = os.path.join(self.args.dbpath, node_label)
+        logfile = os.path.join(self.args.logsdir,
+                               '{0}.log'.format(node_label))
+
+        self.ensure_directory_exists(dbpath, self.args.logsdir)
         
-    def ensure_directory_exists(self, directory):
-        try:
-            os.makedirs(directory)
-        except OSError, ex:
-            if ex.errno != errno.EEXIST:
-                raise ex
+        return command.format(mongod=self.args.mongod,
+                              port=port,
+                              name=self.args.name,
+                              dbpath=dbpath,
+                              log=logfile)
+
+    def ensure_directory_exists(self, *directories):
+        for directory in directories:
+            try:
+                os.makedirs(directory)
+            except OSError, ex:
+                if ex.errno != errno.EEXIST:
+                    raise ex
 
     def initiate(self, nodes):
         self.info('Initiating replica set')
-        primary = nodes[1]
+        primary = self.get_primary_node(nodes)
         admin = None
         limit = 5
         while not admin:
@@ -132,6 +152,13 @@ class Create(Command):
         result = admin.command('replSetInitiate')
         self.info(result, format=True)
         self.info('ok')
+
+    def get_primary_node(self, nodes):
+        index = sorted(nodes.keys())[0]
+        return nodes[index]
+
+    def save_state(self, nodes):
+        state.dump(nodes)
 
 class ListNodes(Command):
 
