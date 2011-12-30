@@ -7,8 +7,8 @@ import sys
 
 import pymongo
 
-from lib import state, exitcodes
-from lib.colors import red
+from replmgr import state, exitcodes
+from replmgr.colors import red
 
 __all__ = 'Create', 'ListNodes', 'KillNodes'
 

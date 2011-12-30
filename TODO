@@ -1,2 +1,0 @@
- - If any problem occurs on create, before the sate if saved, it could
-   end up if "zombie" mongods

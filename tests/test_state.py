@@ -3,8 +3,8 @@ import os
 
 import pytest
 
-from lib import state
-from lib.state import State
+from replmgr import state
+from replmgr.state import State
 
 from helpers import remove_state_file
 

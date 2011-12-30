@@ -4,8 +4,8 @@ import os
 import argparse
 import errno
 
-from lib import commands
-from lib import state
+from replmgr import commands
+from replmgr import state
 
 def main():
     parser = argparse.ArgumentParser(description='MongoDB ReplicaSet Manager')

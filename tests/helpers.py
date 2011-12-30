@@ -4,7 +4,7 @@ import time
 import shutil
 from os.path import dirname, abspath, join
 
-from lib import state
+from replmgr import state
 
 test_logfile = abspath(join(dirname(__file__), 'test-output.log'))
 test_dbpath = '/tmp/test-data'

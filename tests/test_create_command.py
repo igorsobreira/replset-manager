@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from lib import state, exitcodes
+from replmgr import state, exitcodes
 from helpers import run, assert_mongods_running, clear_environ
 
 def setup_function(func):

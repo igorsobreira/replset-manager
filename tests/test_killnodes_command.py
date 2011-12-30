@@ -1,5 +1,5 @@
 
-from lib import state
+from replmgr import state
 from helpers import run, assert_mongods_running, clear_environ, assert_no_state_file
 
 def setup_function(func):

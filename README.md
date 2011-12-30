@@ -42,3 +42,14 @@ Usage
 
     optional arguments:
       -h, --help            show this help message and exit
+
+How to contribute
+-----------------
+
+ 1. Create a fork on github (https://github.com/igorsobreira/replset-manager)
+
+ 2. Install for development:
+    
+    $ python setup.py develop
+
+ 3. Commit(s), push, pull request
