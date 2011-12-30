@@ -52,4 +52,9 @@ How to contribute
     
     $ python setup.py develop
 
+ 3. Run tests:
+ 
+    $ ./runtests
+    $ ./runtests help
+    
  3. Commit(s), push, pull request
