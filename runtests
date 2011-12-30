@@ -1,0 +1,22 @@
+#!/bin/bash
+
+function clear_environ {
+    rm -rf tests/test-output.log
+}
+
+function run {
+    clear_environ
+    echo -e "\033[32mCheck tests/test-output.log for the spawned commands stdout/stderr\033[0m"
+    py.test -vs tests/ $@
+}
+
+function usage {
+    echo "Usage: $ `basename $0` " >&2
+    echo "       $ `basename $0` -k test_foo   # or any other py.test parameter" >&2
+}
+
+if [ "$1" = "help" ]; then
+    usage
+else
+    run $@
+fi
