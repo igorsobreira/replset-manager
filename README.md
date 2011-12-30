@@ -46,15 +46,17 @@ Usage
 How to contribute
 -----------------
 
- 1. Create a fork on github (https://github.com/igorsobreira/replset-manager)
+1. Create a fork on github (https://github.com/igorsobreira/replset-manager)
 
- 2. Install for development:
+2. Install for development:
     
     $ python setup.py develop
 
- 3. Run tests:
+3. Run tests:
  
     $ ./runtests
     $ ./runtests help
     
- 3. Commit(s), push, pull request
+4. Commit(s), push, pull request
+
+5. There a couple scripts on dev-scripts/ you may found useful
