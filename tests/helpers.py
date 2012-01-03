@@ -26,13 +26,12 @@ def clear_environ():
     kill_running_mongods()
 
 def run(command):
-    manager = abspath(join(dirname(__file__), '..', 'manager.py'))
 
     if command == 'create':
         command += ' --name testrepl'
         command += ' --dbpath ' + test_dbpath
 
-    cmd = 'python {0} {1}'.format(manager, command)
+    cmd = 'replmgr {0}'.format(command)
 
     popen = subprocess.Popen(cmd, shell=True,
                              stdout=subprocess.PIPE,
